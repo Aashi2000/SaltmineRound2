@@ -1,26 +1,29 @@
 const Cart = require("../models/cart");
-const Product = require("../models/product");
-const { getPrice } = require("./priceService");
-const Logger = require("../utils/logger"); 
+const ProductFactory = require("../factories/productFactory");
+const Logger = require("../utils/logger");
 
 class CartService {
-  constructor() {
+  constructor(priceService) {
     this.cart = new Cart();
+    this.priceService = priceService;
   }
 
   async addProductToCart(productName, quantity) {
-    const price = await getPrice(productName);
-    this.cart.addProduct(new Product(productName, quantity, price));
+    const price = await this.priceService.getPrice(productName);
+    const product = ProductFactory.createProduct(productName, quantity, price);
+    this.cart.addProduct(product);
+
     Logger.info(`Added ${quantity} x ${productName} @ ${price} each`);
   }
 
+  logCartDetails() {
+    const cartDetails = this.cart.getCartDetails();
+    Logger.info("Cart Details:");
+    Logger.info(JSON.stringify(cartDetails, null, 2));
+  }
+
   getCartDetails() {
-    return {
-      items: this.cart.items,
-      subtotal: this.cart.calculateSubtotal(),
-      tax: this.cart.calculateTax(),
-      total: this.cart.calculateTotal(),
-    };
+    return this.cart.getCartDetails();
   }
 }
 

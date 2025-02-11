@@ -1,6 +1,10 @@
 class Cart {
     constructor() {
+      if (Cart.instance) {
+        return Cart.instance;
+      }
       this.items = [];
+      Cart.instance = this;
     }
   
     addProduct(product) {
@@ -22,6 +26,15 @@ class Cart {
   
     calculateTotal() {
       return parseFloat((this.calculateSubtotal() + this.calculateTax()).toFixed(2));
+    }
+  
+    getCartDetails() {
+      return {
+        items: this.items,
+        subtotal: this.calculateSubtotal(),
+        tax: this.calculateTax(),
+        total: this.calculateTotal(),
+      };
     }
   }
   
